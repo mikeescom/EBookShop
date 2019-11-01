@@ -4,6 +4,7 @@ import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "categories_table")
@@ -19,6 +20,7 @@ public class Category extends BaseObservable {
     @ColumnInfo(name = "category_description")
     private String categoryDescription;
 
+    @Ignore
     public Category() {
     }
 
@@ -56,5 +58,10 @@ public class Category extends BaseObservable {
     public void setCategoryDescription(String categoryDescription) {
         this.categoryDescription = categoryDescription;
         notifyPropertyChanged(com.mikeescom.ebookshop.BR.categoryDescription);
+    }
+
+    @Override
+    public String toString() {
+        return this.categoryName;
     }
 }

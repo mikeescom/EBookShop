@@ -1,7 +1,9 @@
 package com.mikeescom.ebookshop.model;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.room.Database;
@@ -39,6 +41,7 @@ public abstract class BooksDatabase extends RoomDatabase {
 
     private static class InitialDataAsyncTask extends AsyncTask<Void, Void, Void> {
 
+        private static final String TAG = InitialDataAsyncTask.class.getSimpleName();
         private CategoryDAO categoryDAO;
         private BookDAO bookDAO;
 
@@ -54,16 +57,20 @@ public abstract class BooksDatabase extends RoomDatabase {
             category1.setCategoryDescription("Text Books Descriptions");
 
             Category category2 = new Category();
-            category1.setCategoryName("Novels");
-            category1.setCategoryDescription("Novels Descriptions");
+            category2.setCategoryName("Novels");
+            category2.setCategoryDescription("Novels Descriptions");
 
             Category category3 = new Category();
-            category1.setCategoryName("Other Books");
-            category1.setCategoryDescription("Other Books Descriptions");
+            category3.setCategoryName("Other Books");
+            category3.setCategoryDescription("Other Books Descriptions");
 
-            categoryDAO.insert(category1);
-            categoryDAO.insert(category2);
-            categoryDAO.insert(category3);
+            try {
+                categoryDAO.insert(category1);
+                categoryDAO.insert(category2);
+                categoryDAO.insert(category3);
+            } catch (Exception e) {
+                Log.e(TAG, "Error: " + e.getMessage());
+            }
 
             Book book1 = new Book();
             book1.setBookName("High School Java");
@@ -101,13 +108,17 @@ public abstract class BooksDatabase extends RoomDatabase {
             book7.setCategoryId(2);
 
 
-            bookDAO.insert(book1);
-            bookDAO.insert(book2);
-            bookDAO.insert(book3);
-            bookDAO.insert(book4);
-            bookDAO.insert(book5);
-            bookDAO.insert(book6);
-            bookDAO.insert(book7);
+            try {
+                bookDAO.insert(book1);
+                bookDAO.insert(book2);
+                bookDAO.insert(book3);
+                bookDAO.insert(book4);
+                bookDAO.insert(book5);
+                bookDAO.insert(book6);
+                bookDAO.insert(book7);
+            } catch (SQLiteConstraintException e) {
+                Log.e(TAG, "Error: " + e.getMessage());
+            }
 
             return null;
         }

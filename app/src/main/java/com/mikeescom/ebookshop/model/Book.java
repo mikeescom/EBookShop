@@ -5,12 +5,13 @@ import androidx.databinding.Bindable;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import static androidx.room.ForeignKey.CASCADE;
 
 @Entity(tableName = "books_table", foreignKeys = @ForeignKey(entity = Category.class
-        , parentColumns = "id", childColumns = "category_id", onDelete = CASCADE))
+        , parentColumns = "category_id", childColumns = "category_id", onDelete = CASCADE))
 public class Book extends BaseObservable {
 
     @PrimaryKey(autoGenerate = true)
@@ -26,6 +27,7 @@ public class Book extends BaseObservable {
     @ColumnInfo(name = "category_id")
     private int categoryId;
 
+    @Ignore
     public Book() {
     }
 
