@@ -15,7 +15,8 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".MainActivity"
-        tools:showIn="@layout/activity_main">
+        tools:showIn="@layout/activity_main"
+        android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/spinner"
@@ -27,6 +28,18 @@
             android:layout_marginBottom="8dp"
             app:adapter="@{secondarySpinnerAdapter}"
             android:onItemSelected="@{secondaryClickHandler::onSelectItem}"/>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvBooks"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/colorPrimary"
+            />
 
     </LinearLayout>
 </layout>

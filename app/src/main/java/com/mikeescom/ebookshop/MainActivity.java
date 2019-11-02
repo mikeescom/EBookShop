@@ -13,8 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.View;
@@ -22,7 +23,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,9 +33,12 @@ public class MainActivity extends AppCompatActivity {
 
     private MainActivityViewModel mainActivityViewModel;
     private ArrayList<Category> categoriesList;
+    private ArrayList<Book> booksList;
     private ActivityMainBinding activityMainBinding;
     private MainActivityClickHandlers handlers;
     private Category selectedCategory;
+    private RecyclerView booksRecyclerView;
+    private BooksAdapter booksAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,14 +64,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mainActivityViewModel.getBooksOfSelectedCategory(3).observe(this, new Observer<List<Book>>() {
-            @Override
-            public void onChanged(List<Book> books) {
-                for (Book book : books) {
-                    Log.i(TAG, "Book: " + book.getBookName());
-                }
-            }
-        });
+
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -86,6 +82,26 @@ public class MainActivity extends AppCompatActivity {
         activityMainBinding.setSpinnerAdapter(categoryArrayAdapter);
     }
 
+    private void loadBooksArrayList(int categoryId) {
+        mainActivityViewModel.getBooksOfSelectedCategory(categoryId).observe(this, new Observer<List<Book>>() {
+            @Override
+            public void onChanged(List<Book> books) {
+                booksList = (ArrayList) books;
+                loadRecyclerView();
+            }
+        });
+    }
+
+    private void loadRecyclerView() {
+        booksRecyclerView = activityMainBinding.secondaryLayout.rvBooks;
+        booksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        booksRecyclerView.setHasFixedSize(true);
+
+        booksAdapter = new BooksAdapter();
+        booksRecyclerView.setAdapter(booksAdapter);
+        booksAdapter.setBooks(booksList);
+    }
+
     public class MainActivityClickHandlers {
         public void onFABClicked(View view) {
             Snackbar.make(view, "FAB clicked!", Snackbar.LENGTH_LONG)
@@ -97,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
             String message = " id is " + selectedCategory.getCategoryId() + "\n name is " + selectedCategory.getCategoryName();
             Snackbar.make(view, message, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
+            loadBooksArrayList(selectedCategory.getCategoryId());
         }
     }
 
