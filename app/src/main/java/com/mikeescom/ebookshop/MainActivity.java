@@ -1,5 +1,6 @@
 package com.mikeescom.ebookshop;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -9,11 +10,14 @@ import com.mikeescom.ebookshop.model.Book;
 import com.mikeescom.ebookshop.model.Category;
 import com.mikeescom.ebookshop.viewmodel.MainActivityViewModel;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
     private String TAG = MainActivity.class.getSimpleName();
 
+    public static final int ADD_BOOK_REQUEST_CODE = 1;
+    public static final int EDIT_BOOK_REQUEST_CODE = 2;
+
     private MainActivityViewModel mainActivityViewModel;
     private ArrayList<Category> categoriesList;
     private ArrayList<Book> booksList;
@@ -39,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Category selectedCategory;
     private RecyclerView booksRecyclerView;
     private BooksAdapter booksAdapter;
+    private int selectedBookId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,17 +69,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.i(TAG, "Category" + category.getCategoryId() + ": " + category.getCategoryName());
                 }
                 showOnSpinner();
-            }
-        });
-
-
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
             }
         });
     }
@@ -100,12 +97,37 @@ public class MainActivity extends AppCompatActivity {
         booksAdapter = new BooksAdapter();
         booksRecyclerView.setAdapter(booksAdapter);
         booksAdapter.setBooks(booksList);
+        booksAdapter.setListener(new BooksAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Book book) {
+                selectedBookId = book.getBookId();
+                Log.i("BookIdTest"," at 1 id is " + selectedBookId);
+                Intent intent = new Intent(MainActivity.this, AddAndEditActivity.class);
+                intent.putExtra(AddAndEditActivity.BOOK_ID,selectedBookId);
+                Log.i("BookIdTest"," at 2 id is " + selectedBookId);
+                intent.putExtra(AddAndEditActivity.BOOK_NAME,book.getBookName());
+                intent.putExtra(AddAndEditActivity.UNIT_PRICE,book.getUnitPrice());
+                startActivityForResult(intent,EDIT_BOOK_REQUEST_CODE);
+            }
+        });
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder viewHolder1) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+                Book bookToDelete = booksList.get(viewHolder.getAdapterPosition());
+                mainActivityViewModel.deleteBook(bookToDelete);
+            }
+        }).attachToRecyclerView(booksRecyclerView);
     }
 
     public class MainActivityClickHandlers {
         public void onFABClicked(View view) {
-            Snackbar.make(view, "FAB clicked!", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            Intent intent = new Intent(MainActivity.this,AddAndEditActivity.class);
+            startActivityForResult(intent,ADD_BOOK_REQUEST_CODE);
         }
 
         public void onSelectItem(AdapterView<?> parent, View view, int pos, long id) {
@@ -137,5 +159,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.i("BookIdTest"," at 4 top id is "+selectedBookId);
+        int selectedCategoryId = selectedCategory.getCategoryId();
+        if(requestCode == ADD_BOOK_REQUEST_CODE && resultCode == RESULT_OK) {
+            Log.i("BookIdTest"," at 4 wrong 2 id is "+selectedBookId);
+            Book book=new Book();
+            book.setCategoryId(selectedCategoryId);
+            book.setBookName(data.getStringExtra(AddAndEditActivity.BOOK_NAME));
+            book.setUnitPrice(data.getStringExtra(AddAndEditActivity.UNIT_PRICE));
+            mainActivityViewModel.addNewBook(book);
+        } else if (requestCode == EDIT_BOOK_REQUEST_CODE && resultCode == RESULT_OK) {
+            Book book=new Book();
+            book.setCategoryId(selectedCategoryId);
+            book.setBookName(data.getStringExtra(AddAndEditActivity.BOOK_NAME));
+            book.setUnitPrice(data.getStringExtra(AddAndEditActivity.UNIT_PRICE));
+            Log.i("BookIdTest"," at 4 id is "+selectedBookId);
+            book.setBookId(selectedBookId);
+            mainActivityViewModel.updateBook(book);
+        }
     }
 }
