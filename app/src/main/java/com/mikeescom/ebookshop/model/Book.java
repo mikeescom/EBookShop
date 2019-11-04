@@ -8,6 +8,8 @@ import androidx.room.ForeignKey;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import java.util.Objects;
+
 import static androidx.room.ForeignKey.CASCADE;
 
 @Entity(tableName = "books_table", foreignKeys = @ForeignKey(entity = Category.class
@@ -76,5 +78,21 @@ public class Book extends BaseObservable {
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
         notifyPropertyChanged(com.mikeescom.ebookshop.BR.categoryId);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Book)) return false;
+        Book book = (Book) o;
+        return getBookId() == book.getBookId() &&
+                getCategoryId() == book.getCategoryId() &&
+                getBookName().equals(book.getBookName()) &&
+                getUnitPrice().equals(book.getUnitPrice());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getBookId(), getBookName(), getUnitPrice(), getCategoryId());
     }
 }
